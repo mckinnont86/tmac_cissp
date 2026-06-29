@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CISSP Study Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --border-subtle: #21262d;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --text-dim: #484f58;
+    --accent: #7c6af7;
+    --accent-dim: #1e1a3a;
+    --accent-border: #3d3580;
+    --green: #3fb950;
+    --green-dim: #0d2119;
+    --green-border: #1a4228;
+    --amber: #d29922;
+    --amber-dim: #271d06;
+    --amber-border: #4a3508;
+    --red: #f85149;
+    --red-dim: #300b0a;
+    --blue: #58a6ff;
+    --blue-dim: #0c1c33;
+    --teal: #39d0c4;
+    --teal-dim: #0a2524;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 8px;
+    --radius-sm: 5px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* LAYOUT */
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .main { padding: 2rem 2.5rem; max-width: 900px; }
+
+  /* SIDEBAR */
+  .sidebar-header {
+    padding: 1.5rem 1.25rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sidebar-logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sidebar-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .sidebar-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .sidebar-progress {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sidebar-progress-label {
+    font-size: 11px; color: var(--text-muted); font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+  .progress-bar-track {
+    background: var(--surface2);
+    border-radius: 999px;
+    height: 5px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-bar-fill {
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--teal));
+    transition: width 0.4s ease;
+  }
+  .progress-summary { font-size: 11px; color: var(--text-dim); }
+
+  .sidebar-nav { padding: 0.75rem 0; flex: 1; }
+  .nav-section-label {
+    font-size: 10px; font-family: var(--mono); color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.5rem 1.25rem 0.25rem;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 1.25rem;
+    font-size: 13px; color: var(--text-muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .nav-item-count {
+    margin-left: auto; font-size: 11px; font-family: var(--mono);
+    color: var(--text-dim); background: var(--surface2);
+    padding: 1px 7px; border-radius: 999px;
+  }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 2rem; }
+  .page-eyebrow {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+  }
+  .page-title { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+  .page-subtitle { font-size: 14px; color: var(--text-muted); max-width: 540px; line-height: 1.6; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 2px; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn {
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    padding: 8px 16px; cursor: pointer; background: transparent; border: none;
+    color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all 0.15s; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--surface2); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* PHASE CARDS */
+  .phase-list { display: flex; flex-direction: column; gap: 16px; }
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .phase-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .phase-header:hover { background: var(--surface2); }
+  .phase-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    flex-shrink: 0;
+  }
+  .phase-meta { flex: 1; }
+  .phase-name { font-size: 15px; font-weight: 500; }
+  .phase-period { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .phase-progress-label { font-size: 12px; color: var(--text-muted); font-family: var(--mono); white-space: nowrap; }
+  .chevron { color: var(--text-dim); font-size: 12px; transition: transform 0.2s; }
+  .phase-body { display: none; border-top: 1px solid var(--border-subtle); padding: 16px 18px; }
+  .phase-card.open .phase-body { display: block; }
+  .phase-card.open .chevron { transform: rotate(90deg); }
+  .phase-note {
+    font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-border);
+    background: var(--accent-dim);
+    margin-bottom: 14px;
+  }
+
+  /* TASK LIST */
+  .task-list { display: flex; flex-direction: column; gap: 4px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    transition: background 0.12s; cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .task-item:hover { background: var(--surface2); border-color: var(--border-subtle); }
+  .task-item.done { opacity: 0.55; }
+  .task-check {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--green);
+    transition: all 0.15s;
+    background: var(--surface2);
+  }
+  .task-item.done .task-check { background: var(--green-dim); border-color: var(--green-border); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-size: 13px; font-weight: 500; }
+  .task-item.done .task-name { text-decoration: line-through; color: var(--text-muted); }
+  .task-detail { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+  .task-tag {
+    font-size: 11px; padding: 1px 8px; border-radius: 999px;
+    font-family: var(--mono); flex-shrink: 0; margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* DOMAIN GRID */
+  .domain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .domain-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .domain-card:hover { border-color: var(--accent-border); }
+  .domain-card.mastered { border-color: var(--green-border); background: color-mix(in srgb, var(--surface) 85%, var(--green-dim)); }
+  .domain-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .domain-num-badge {
+    font-size: 10px; font-family: var(--mono); color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .domain-weight {
+    font-size: 11px; padding: 1px 8px; border-radius: 999px;
+    font-family: var(--mono); font-weight: 500;
+  }
+  .domain-name { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .domain-status { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .domain-status-label { font-size: 12px; color: var(--text-muted); }
+  .domain-status-select {
+    font-size: 12px; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius-sm);
+    padding: 3px 8px; cursor: pointer; font-family: var(--sans);
+  }
+  .domain-status-select:focus { outline: 1px solid var(--accent); }
+  .domain-bar-track { background: var(--surface2); border-radius: 999px; height: 4px; margin-top: 10px; overflow: hidden; }
+  .domain-bar-fill { height: 4px; border-radius: 999px; transition: width 0.4s; }
+  .domain-topics { font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height: 1.5; }
+
+  /* RESOURCE TABLE */
+  .resource-section { margin-bottom: 2rem; }
+  .resource-section-title {
+    font-size: 11px; font-family: var(--mono); color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .resource-section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border-subtle);
+  }
+  .resource-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .res-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .res-card:hover { border-color: var(--border); background: var(--surface2); }
+  .res-card.checked { border-color: var(--green-border); }
+  .res-card.checked::after {
+    content: '✓'; position: absolute; top: 10px; right: 12px;
+    color: var(--green); font-size: 13px; font-weight: 600;
+  }
+  .res-badge {
+    font-size: 11px; padding: 2px 9px; border-radius: 999px;
+    display: inline-block; margin-bottom: 8px; font-family: var(--mono); font-weight: 500;
+  }
+  .res-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .res-detail { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .res-pro {
+    font-size: 11px; color: var(--accent); margin-top: 8px; padding: 6px 10px;
+    background: var(--accent-dim); border-radius: var(--radius-sm); line-height: 1.4;
+  }
+
+  /* NOTES */
+  .notes-area {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: var(--mono);
+    font-size: 13px; line-height: 1.7; padding: 14px 16px; resize: vertical;
+    min-height: 200px; transition: border-color 0.15s;
+  }
+  .notes-area:focus { outline: none; border-color: var(--accent); }
+  .notes-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .save-btn {
+    margin-top: 10px; padding: 7px 18px;
+    background: var(--accent-dim); border: 1px solid var(--accent-border);
+    color: var(--accent); border-radius: var(--radius-sm); cursor: pointer;
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    transition: all 0.15s;
+  }
+  .save-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .save-confirm { font-size: 12px; color: var(--green); margin-left: 12px; opacity: 0; transition: opacity 0.3s; }
+
+  /* STAT CARDS */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .stat-val { font-size: 26px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+  .stat-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  /* WEEKLY SCHEDULE */
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .week-day { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 10px; text-align: center; }
+  .week-day.rest { opacity: 0.4; }
+  .week-day-name { font-size: 10px; font-family: var(--mono); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .week-day-task { font-size: 12px; font-weight: 500; line-height: 1.4; }
+  .week-day-hrs { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-family: var(--mono); }
+  .week-note {
+    font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    padding: 12px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); border-left: 3px solid var(--teal);
+  }
+
+  /* TIPS */
+  .tip-list { display: flex; flex-direction: column; gap: 10px; }
+  .tip {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .tip-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    flex-shrink: 0; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border);
+  }
+  .tip-text { font-size: 13px; line-height: 1.65; color: var(--text-muted); }
+  .tip-text strong { color: var(--text); font-weight: 500; }
+
+  /* COLORS */
+  .c-purple { background: #1e1a3a; color: #a89cf7; border-color: #3d3580; }
+  .c-green { background: #0d2119; color: #3fb950; border-color: #1a4228; }
+  .c-amber { background: #271d06; color: #d29922; border-color: #4a3508; }
+  .c-red { background: #300b0a; color: #f85149; border-color: #6a1e1e; }
+  .c-blue { background: #0c1c33; color: #58a6ff; border-color: #1c3a60; }
+  .c-teal { background: #0a2524; color: #39d0c4; border-color: #1a4a48; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .main { padding: 1.25rem; }
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .domain-grid, .resource-cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">CISSP · 2026</div>
+      <div class="sidebar-title">Study Tracker</div>
+      <div class="sidebar-subtitle">Experienced pro · 9–12 months</div>
+    </div>
+    <div class="sidebar-progress">
+      <div class="sidebar-progress-label">
+        <span>Overall progress</span>
+        <span id="pct-label">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="global-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-summary" id="global-summary">0 of 0 tasks complete</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <div class="nav-dot" style="background:var(--accent)"></div>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('timeline')">
+        <div class="nav-dot" style="background:var(--teal)"></div>
+        Timeline
+      </div>
+      <div class="nav-item" onclick="showPage('weekly')">
+        <div class="nav-dot" style="background:var(--blue)"></div>
+        Weekly Schedule
+      </div>
+      <div class="nav-section-label" style="margin-top:0.5rem">Study</div>
+      <div class="nav-item" onclick="showPage('domains')">
+        <div class="nav-dot" style="background:var(--amber)"></div>
+        8 Domains
+      </div>
+      <div class="nav-item" onclick="showPage('resources')">
+        <div class="nav-dot" style="background:var(--green)"></div>
+        Books & Courses
+      </div>
+      <div class="nav-item" onclick="showPage('media')">
+        <div class="nav-dot" style="background:var(--teal)"></div>
+        Podcasts & Blogs
+      </div>
+      <div class="nav-section-label" style="margin-top:0.5rem">Planning</div>
+      <div class="nav-item" onclick="showPage('tips')">
+        <div class="nav-dot" style="background:var(--red)"></div>
+        Exam Strategy
+      </div>
+      <div class="nav-item" onclick="showPage('notes')">
+        <div class="nav-dot" style="background:var(--text-dim)"></div>
+        Study Notes
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div class="page-eyebrow">Overview</div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">Track your progress across all phases, domains, and resources. Everything saves automatically in your browser.</div>
+      </div>
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Tasks done</div>
+          <div class="stat-val" id="stat-tasks">0</div>
+          <div class="stat-sub" id="stat-tasks-sub">of 0 total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Domains studied</div>
+          <div class="stat-val" id="stat-domains">0</div>
+          <div class="stat-sub">of 8 domains</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Books started</div>
+          <div class="stat-val" id="stat-books">0</div>
+          <div class="stat-sub" id="stat-books-sub">of 0 resources</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Current phase</div>
+          <div class="stat-val" id="stat-phase" style="font-size:18px;margin-top:4px;">—</div>
+          <div class="stat-sub" id="stat-phase-sub"></div>
+        </div>
+      </div>
+
+      <div class="resource-section-title">Phase quick-view</div>
+      <div style="display:flex;flex-direction:column;gap:8px;" id="phase-quickview"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="page-timeline" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Study plan</div>
+        <div class="page-title">Timeline</div>
+        <div class="page-subtitle">Four phases over 9–10 months. Click a phase to expand tasks. Check off items as you complete them.</div>
+      </div>
+      <div class="phase-list" id="phase-list"></div>
+    </div>
+
+    <!-- WEEKLY -->
+    <div id="page-weekly" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Routine</div>
+        <div class="page-title">Weekly Schedule</div>
+        <div class="page-subtitle">A sustainable 7–8 hour week across the core study phase. Ramp Saturday blocks to 4 hrs in months 9–10.</div>
+      </div>
+      <div class="week-grid">
+        <div class="week-day"><div class="week-day-name">Mon</div><div class="week-day-task">Read — 1 chapter or domain section</div><div class="week-day-hrs">1.5 hrs</div></div>
+        <div class="week-day"><div class="week-day-name">Tue</div><div class="week-day-task">Practice — 50 domain Qs + review wrongs</div><div class="week-day-hrs">1 hr</div></div>
+        <div class="week-day"><div class="week-day-name">Wed</div><div class="week-day-task">Podcast commute + Thor notes skim</div><div class="week-day-hrs">~45 min</div></div>
+        <div class="week-day"><div class="week-day-name">Thu</div><div class="week-day-task">Practice — 50 Qs + flashcard review</div><div class="week-day-hrs">1 hr</div></div>
+        <div class="week-day"><div class="week-day-name">Fri</div><div class="week-day-task">Video — Destination Cert domain recap</div><div class="week-day-hrs">45 min</div></div>
+        <div class="week-day"><div class="week-day-name">Sat</div><div class="week-day-task">Deep study block — weak areas or new chapter</div><div class="week-day-hrs">2.5 hrs</div></div>
+        <div class="week-day rest"><div class="week-day-name">Sun</div><div class="week-day-task">Rest or light podcast</div><div class="week-day-hrs">0–30 min</div></div>
+      </div>
+      <div class="week-note">Total ~7.5 hrs/week — within your 5–10 hr window. Ramp Saturday to 4 hrs in the final 2 months when you need full mock exam blocks.</div>
+
+      <div style="margin-top:2rem">
+        <div class="resource-section-title">Daily question targets</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+          <div class="stat-card"><div class="stat-label">Core phase (mo. 2–8)</div><div class="stat-val">50</div><div class="stat-sub">practice Qs per day</div></div>
+          <div class="stat-card"><div class="stat-label">Weak domains</div><div class="stat-val">100+</div><div class="stat-sub">Qs per week per domain</div></div>
+          <div class="stat-card"><div class="stat-label">Final 2 months</div><div class="stat-val">125</div><div class="stat-sub">full mock exams</div></div>
+          <div class="stat-card"><div class="stat-label">Exam-ready score</div><div class="stat-val">78%</div><div class="stat-sub">on 3 consecutive mocks</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOMAINS -->
+    <div id="page-domains" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">CBK</div>
+        <div class="page-title">8 Domains</div>
+        <div class="page-subtitle">Track your status for each domain. Prioritize D1, D3, and D8 — the likely gaps for experienced practitioners.</div>
+      </div>
+      <div class="domain-grid" id="domain-grid"></div>
+    </div>
+
+    <!-- RESOURCES -->
+    <div id="page-resources" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Study materials</div>
+        <div class="page-title">Books & Courses</div>
+        <div class="page-subtitle">Check off resources as you start or finish them. Click cards to toggle.</div>
+      </div>
+      <div id="resources-content"></div>
+    </div>
+
+    <!-- MEDIA -->
+    <div id="page-media" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Passive learning</div>
+        <div class="page-title">Podcasts & Blogs</div>
+        <div class="page-subtitle">Maximize your limited hours by stacking podcast listening on commutes and dead time.</div>
+      </div>
+      <div id="media-content"></div>
+    </div>
+
+    <!-- TIPS -->
+    <div id="page-tips" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Exam day</div>
+        <div class="page-title">Exam Strategy</div>
+        <div class="page-subtitle">Six critical strategies for experienced professionals — read these early and revisit before exam day.</div>
+      </div>
+      <div class="tip-list" id="tips-list"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="page-notes" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-eyebrow">Your notes</div>
+        <div class="page-title">Study Notes</div>
+        <div class="page-subtitle">Freeform notes, domain summaries, concepts to revisit. Saves to browser storage.</div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchNoteTab(this,'note-general')">General</button>
+        <button class="tab-btn" onclick="switchNoteTab(this,'note-d1')">Domain 1</button>
+        <button class="tab-btn" onclick="switchNoteTab(this,'note-d3')">Domain 3</button>
+        <button class="tab-btn" onclick="switchNoteTab(this,'note-weak')">Weak areas</button>
+        <button class="tab-btn" onclick="switchNoteTab(this,'note-exam')">Exam prep</button>
+      </div>
+      <div id="note-general" class="tab-panel active">
+        <div class="notes-label">General notes</div>
+        <textarea class="notes-area" id="note-general-ta" placeholder="Start typing..."></textarea>
+        <button class="save-btn" onclick="saveNote('general')">Save</button>
+        <span class="save-confirm" id="save-general-confirm">Saved ✓</span>
+      </div>
+      <div id="note-d1" class="tab-panel">
+        <div class="notes-label">Domain 1 — Security & Risk Management</div>
+        <textarea class="notes-area" id="note-d1-ta" placeholder="Risk frameworks, governance concepts, ethics notes..."></textarea>
+        <button class="save-btn" onclick="saveNote('d1')">Save</button>
+        <span class="save-confirm" id="save-d1-confirm">Saved ✓</span>
+      </div>
+      <div id="note-d3" class="tab-panel">
+        <div class="notes-label">Domain 3 — Security Architecture & Engineering</div>
+        <textarea class="notes-area" id="note-d3-ta" placeholder="Crypto concepts, security models, Bell-LaPadula, Biba..."></textarea>
+        <button class="save-btn" onclick="saveNote('d3')">Save</button>
+        <span class="save-confirm" id="save-d3-confirm">Saved ✓</span>
+      </div>
+      <div id="note-weak" class="tab-panel">
+        <div class="notes-label">Weak areas to revisit</div>
+        <textarea class="notes-area" id="note-weak-ta" placeholder="Topics you got wrong, concepts to review again..."></textarea>
+        <button class="save-btn" onclick="saveNote('weak')">Save</button>
+        <span class="save-confirm" id="save-weak-confirm">Saved ✓</span>
+      </div>
+      <div id="note-exam" class="tab-panel">
+        <div class="notes-label">Exam prep & mock exam scores</div>
+        <textarea class="notes-area" id="note-exam-ta" placeholder="Mock exam scores, patterns noticed, things to remember..."></textarea>
+        <button class="save-btn" onclick="saveNote('exam')">Save</button>
+        <span class="save-confirm" id="save-exam-confirm">Saved ✓</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const PHASES = [
+  {
+    id: 'p1', num: 1, name: 'Orientation & Gap Analysis', period: 'Months 1–1.5 · ~6 hrs/week',
+    color: 'c-purple',
+    note: "As an experienced pro, don't start reading from page 1. Map your existing knowledge to the 8 domains first — you'll study 40% less by skipping what you already know deeply.",
+    tasks: [
+      { id: 't1', name: 'Complete a domain baseline quiz', detail: '100 Qs across all 8 domains — score by domain to find your gaps', tag: 'assess', tagColor: 'c-purple' },
+      { id: 't2', name: 'Watch: Kelly Handerhan — "Why you will pass"', detail: 'Free YouTube video — critical mindset shift even for experienced practitioners', tag: 'watch', tagColor: 'c-teal' },
+      { id: 't3', name: 'Read: Official (ISC)² Study Guide — intro + domain outlines', detail: 'Skim only. Understand scope of each domain before committing to a study order.', tag: 'read', tagColor: 'c-blue' },
+      { id: 't4', name: 'Identify your 3 weakest domains by score', detail: 'Write them down — these get 3–4 weeks each in Phase 3, not one', tag: 'plan', tagColor: 'c-amber' },
+      { id: 't5', name: 'Set up your weekly study schedule', detail: 'Block calendar time — consistency beats intensity for a 9-month plan', tag: 'plan', tagColor: 'c-amber' },
+    ]
+  },
+  {
+    id: 'p2', num: 2, name: 'Strong Domain Acceleration', period: 'Months 2–4 · ~7 hrs/week',
+    color: 'c-blue',
+    note: 'Blast through your strong domains (likely D4, D5, D7 for most security pros). One week each — read summaries, do 50 Qs, move on. Bank the time for your weak areas later.',
+    tasks: [
+      { id: 't6', name: 'Watch: Destination Certification domain mind maps (strong domains)', detail: 'One 20-30 min video per domain — efficient visual overview', tag: 'watch', tagColor: 'c-teal' },
+      { id: 't7', name: 'Complete 50 practice Qs per strong domain', detail: 'CCCure.org (free) or Boson — aim for 80%+ on your strong domains', tag: 'practice', tagColor: 'c-amber' },
+      { id: 't8', name: 'Subscribe: CISSP Cyber Training Podcast', detail: 'Start listening to domain-specific episodes during commute', tag: 'podcast', tagColor: 'c-purple' },
+      { id: 't9', name: 'Read domain summaries on thorteaches.com', detail: 'Thor Pedersen\'s free notes — read after each domain pass to confirm retention', tag: 'read', tagColor: 'c-blue' },
+      { id: 't10', name: 'Finish Domains 2, 4, 5, 6, and 7 (strong domains)', detail: 'These are acceleration targets — don\'t linger', tag: 'milestone', tagColor: 'c-green' },
+    ]
+  },
+  {
+    id: 'p3', num: 3, name: 'Deep Study — Weak Domains', period: 'Months 5–8 · ~8 hrs/week',
+    color: 'c-amber',
+    note: 'For most experienced practitioners, weak spots are Domain 1 (Risk/Governance), Domain 3 (Crypto & security models), and Domain 8 (SDLC). These need 3–4 weeks each, not one.',
+    tasks: [
+      { id: 't11', name: 'Deep read: CISSP All-in-One (weak domain chapters only)', detail: 'Skip the chapters you\'ve already accelerated — use this as a deep reference', tag: 'read', tagColor: 'c-blue' },
+      { id: 't12', name: 'Study Domain 1 — Security & Risk Management (4 weeks)', detail: 'Risk frameworks, ethics, legal, BCP — governance mindset, not just formulas', tag: 'domain', tagColor: 'c-amber' },
+      { id: 't13', name: 'Study Domain 3 — Security Architecture & Engineering (3–4 weeks)', detail: 'Cryptography, security models (Bell-LaPadula, Biba, Clark-Wilson)', tag: 'domain', tagColor: 'c-amber' },
+      { id: 't14', name: 'Study Domain 8 — Software Development Security (2–3 weeks)', detail: 'SDLC, DevSecOps, OWASP Top 10 — especially relevant if non-developer background', tag: 'domain', tagColor: 'c-amber' },
+      { id: 't15', name: 'Complete 100+ domain Qs/week on each weak area', detail: 'Target 75%+ consistently before moving on from any weak domain', tag: 'practice', tagColor: 'c-amber' },
+      { id: 't16', name: 'Read 20+ exam debrief posts on r/cissp', detail: 'Filter by "passed" — note recurring topics and what the real exam emphasizes', tag: 'research', tagColor: 'c-purple' },
+      { id: 't17', name: 'Score 75%+ on all 8 domains in practice bank', detail: 'This is the gate to Phase 4 — don\'t advance until you hit this consistently', tag: 'milestone', tagColor: 'c-green' },
+    ]
+  },
+  {
+    id: 'p4', num: 4, name: 'Integration & Mock Exams', period: 'Months 9–10 · ~10 hrs/week',
+    color: 'c-red',
+    note: 'Stop learning new material 3 weeks before the exam. Switch entirely to full-length practice exams, timed. Target 78%+ on 3 consecutive sims before booking your date.',
+    tasks: [
+      { id: 't18', name: 'Read: Eleventh Hour CISSP (rapid review)', detail: 'Eric Conrad — only open this in the final 2 weeks, not before', tag: 'read', tagColor: 'c-blue' },
+      { id: 't19', name: 'Complete 4 full 125-question mock exams', detail: 'Official Practice Tests + Boson ExSim — timed, exam conditions', tag: 'practice', tagColor: 'c-amber' },
+      { id: 't20', name: 'Score 78%+ on 3 consecutive mock exams', detail: 'This is your signal to book the exam — don\'t schedule before hitting this', tag: 'milestone', tagColor: 'c-green' },
+      { id: 't21', name: 'Re-watch Kelly Handerhan mindset video', detail: 'Reinforce the "think like a manager" lens 1 week before exam day', tag: 'watch', tagColor: 'c-teal' },
+      { id: 't22', name: 'Book exam date', detail: 'Pearson VUE — confirm your testing center and logistics', tag: 'admin', tagColor: 'c-purple' },
+      { id: 't23', name: 'Complete exam day logistics check', detail: 'ID requirements, testing center rules, what to bring/not bring', tag: 'admin', tagColor: 'c-purple' },
+    ]
+  }
+];
+
+const DOMAINS = [
+  { id: 'd1', num: 1, name: 'Security & Risk Management', weight: '16%', priority: 'Highest weight', color: 'c-red', weeks: '4 weeks', topics: 'Ethics, governance, compliance, legal frameworks, risk concepts, BCP fundamentals', proNote: true },
+  { id: 'd2', num: 2, name: 'Asset Security', weight: '10%', priority: 'Lower weight', color: 'c-green', weeks: '1 week', topics: 'Data classification, ownership, privacy, retention, destruction methods' },
+  { id: 'd3', num: 3, name: 'Security Architecture & Engineering', weight: '13%', priority: 'High weight', color: 'c-amber', weeks: '3–4 weeks', topics: 'Security models, cryptography, physical security, system design principles', proNote: true },
+  { id: 'd4', num: 4, name: 'Communication & Network Security', weight: '13%', priority: 'Likely strong', color: 'c-blue', weeks: '1–2 weeks', topics: 'OSI/TCP-IP, protocols, VPNs, firewalls, wireless, secure network design' },
+  { id: 'd5', num: 5, name: 'Identity & Access Management', weight: '13%', priority: 'Likely strong', color: 'c-blue', weeks: '2 weeks', topics: 'Authentication, authorization, federation, access control models, provisioning' },
+  { id: 'd6', num: 6, name: 'Security Assessment & Testing', weight: '12%', priority: 'Moderate', color: 'c-teal', weeks: '1–2 weeks', topics: 'Pen testing, audits, vulnerability assessments, log review, KPIs' },
+  { id: 'd7', num: 7, name: 'Security Operations', weight: '13%', priority: 'Likely strong', color: 'c-blue', weeks: '1–2 weeks', topics: 'Incident response, investigations, recovery, change management, patch management' },
+  { id: 'd8', num: 8, name: 'Software Development Security', weight: '10%', priority: 'Watch carefully', color: 'c-amber', weeks: '2–3 weeks', topics: 'SDLC, secure coding, OWASP, DevSecOps, code review, software acquisition' },
+];
+
+const RESOURCES = [
+  {
+    section: 'Primary books',
+    items: [
+      { id: 'r1', badge: 'Primary · recommended', badgeColor: 'c-purple', name: 'Official (ISC)² CISSP Study Guide', detail: 'Chapple, Stewart & Gibson. Most aligned to current exam objectives and CBK language. Start here.', pro: 'Use end-of-chapter questions to decide if you need to read the full chapter at all.' },
+      { id: 'r2', badge: 'Deep reference', badgeColor: 'c-blue', name: 'CISSP All-in-One Exam Guide', detail: 'Shon Harris / Mike Chapple. Exhaustive — use as a reference for weak domains, not cover-to-cover.', pro: 'Pull this out only when the official guide\'s treatment of a topic feels too thin.' },
+      { id: 'r3', badge: 'Final sprint', badgeColor: 'c-green', name: 'Eleventh Hour CISSP', detail: 'Eric Conrad. Condensed rapid-review — open only in the final 2 weeks before exam day.' },
+    ]
+  },
+  {
+    section: 'Practice materials',
+    items: [
+      { id: 'r4', badge: 'Official practice', badgeColor: 'c-blue', name: 'Official (ISC)² CISSP Practice Tests', detail: '1,300+ questions aligned to CBK. Official phrasing matches exam questions more closely than third-party banks.' },
+      { id: 'r5', badge: 'Best paid bank', badgeColor: 'c-amber', name: 'Boson ExSim for CISSP', detail: 'Adaptive engine + detailed answer explanations. Best paid question bank. Worth the subscription.' },
+      { id: 'r6', badge: 'Free', badgeColor: 'c-green', name: 'CCCure.org', detail: 'Free question bank with 3,000+ questions. Older but still solid for volume practice early on.' },
+    ]
+  },
+  {
+    section: 'Video courses',
+    items: [
+      { id: 'r7', badge: 'Free · essential', badgeColor: 'c-purple', name: 'Destination Certification (YouTube)', detail: 'Mind map video series — one per domain. Efficient visual overviews perfect for experienced pros.' },
+      { id: 'r8', badge: 'Free · mindset', badgeColor: 'c-purple', name: 'Kelly Handerhan — CyberKraft (Cybrary)', detail: 'Famous "think like a manager" framework. Watch before starting and again the week before exam.' },
+      { id: 'r9', badge: 'Free', badgeColor: 'c-teal', name: 'Pete Zerger — Inside Cloud & Security', detail: 'Free YouTube videos with solid practical breakdowns of each domain.' },
+    ]
+  },
+];
+
+const MEDIA = [
+  {
+    section: 'Podcasts',
+    items: [
+      { id: 'm1', badge: 'Top pick', badgeColor: 'c-blue', name: 'CISSP Cyber Training Podcast', detail: 'Sean Gerber. Domain-organized episodes, consistent quality. Best use of commute time — most recommended in the community.' },
+      { id: 'm2', badge: 'General security', badgeColor: 'c-blue', name: 'Risky Business', detail: 'Industry news and commentary. Keeps your thinking current while you study — feels less like studying.' },
+      { id: 'm3', badge: 'Narrative learning', badgeColor: 'c-blue', name: 'Darknet Diaries', detail: 'Real-world incident stories. Reinforces security ops and risk concepts narratively.' },
+      { id: 'm4', badge: 'Technical depth', badgeColor: 'c-blue', name: 'Security Now (Steve Gibson)', detail: 'Deep technical dives — especially strong for cryptography and architecture topics (Domains 3 & 4).' },
+    ]
+  },
+  {
+    section: 'Blogs & websites',
+    items: [
+      { id: 'm5', badge: 'Free · essential', badgeColor: 'c-green', name: 'Thor Pedersen\'s CISSP Notes (thorteaches.com)', detail: 'Dense, free notes for all 8 domains. Read after each chapter to confirm key point retention.' },
+      { id: 'm6', badge: 'Community', badgeColor: 'c-green', name: 'r/cissp (Reddit)', detail: 'Exam debrief posts are invaluable. Read 20+ "passed" posts — reveals what the real exam emphasizes.' },
+      { id: 'm7', badge: 'Community', badgeColor: 'c-green', name: 'TechExams.net CISSP Forum', detail: 'Better signal-to-noise than Reddit. Great for domain-specific questions when you\'re stuck.' },
+      { id: 'm8', badge: 'Flashcards', badgeColor: 'c-amber', name: 'Quizlet — CISSP CBK decks', detail: 'Search "CISSP CBK" for community decks. Use for acronym-heavy domains during dead time.' },
+    ]
+  },
+];
+
+const TIPS = [
+  { num: 1, text: '<strong>Unlearn your technical instincts.</strong> The #1 trap for experienced practitioners is answering from operational experience. The CISSP wants what a CISO would decide, not what an engineer would implement. When in doubt, pick the policy/governance answer over the technical one.' },
+  { num: 2, text: '<strong>Don\'t skip Domain 1 because it seems soft.</strong> Security and Risk Management at 16% of the exam is the hardest domain for experienced practitioners — it rewards conceptual thinking over hands-on expertise. Budget 4 full weeks regardless of your confidence level.' },
+  { num: 3, text: '<strong>Take the baseline assessment seriously.</strong> Map your domain scores in month 1 and study in inverse proportion. Experienced pros often over-study their strong domains — it feels comfortable but doesn\'t move the needle on exam day.' },
+  { num: 4, text: '<strong>The exam is adaptive (CAT format).</strong> It ends at 125–175 questions. Long exams are not a bad sign — you may be performing well on difficult questions. Each question is independent, so don\'t catastrophize if you feel uncertain mid-exam.' },
+  { num: 5, text: '<strong>Prioritize, don\'t prevent.</strong> Many questions are about sequencing. The CISSP answer almost never leads with implementing a technical control — it leads with assessing impact, identifying scope, or briefing senior leadership first.' },
+  { num: 6, text: '<strong>Book the exam when you hit 78%+ on three consecutive full mocks.</strong> Not 75%, not "feeling ready." Three in a row at 78%+ gives you the statistical buffer to handle exam-day variance. With your schedule you\'ll likely hit this at months 9–10.' },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('cissp_state') || '{}'); } catch { return {}; }
+}
+function saveState(state) {
+  localStorage.setItem('cissp_state', JSON.stringify(state));
+}
+
+let state = loadState();
+
+function getChecked(id) { return !!(state.checked && state.checked[id]); }
+function toggleChecked(id) {
+  if (!state.checked) state.checked = {};
+  state.checked[id] = !state.checked[id];
+  saveState(state);
+  updateGlobalProgress();
+  updateDashboard();
+}
+function getDomainStatus(id) { return (state.domains && state.domains[id]) || 'not-started'; }
+function setDomainStatus(id, val) {
+  if (!state.domains) state.domains = {};
+  state.domains[id] = val;
+  saveState(state);
+  updateGlobalProgress();
+  updateDashboard();
+}
+function getNote(key) { return (state.notes && state.notes[key]) || ''; }
+function setNote(key, val) {
+  if (!state.notes) state.notes = {};
+  state.notes[key] = val;
+  saveState(state);
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function renderPhases() {
+  const list = document.getElementById('phase-list');
+  list.innerHTML = '';
+  PHASES.forEach((phase, pi) => {
+    const done = phase.tasks.filter(t => getChecked(t.id)).length;
+    const total = phase.tasks.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const card = document.createElement('div');
+    card.className = 'phase-card';
+    card.id = 'phase-card-' + phase.id;
+    card.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${phase.id}')">
+        <div class="phase-num ${phase.color}">${phase.num}</div>
+        <div class="phase-meta">
+          <div class="phase-name">${phase.name}</div>
+          <div class="phase-period">${phase.period}</div>
+        </div>
+        <div class="phase-progress-label">${done}/${total}</div>
+        <div class="chevron">▶</div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-note">${phase.note}</div>
+        <div class="task-list" id="tasks-${phase.id}">
+          ${phase.tasks.map(t => renderTask(t)).join('')}
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+  attachTaskHandlers();
+}
+
+function renderTask(t) {
+  const done = getChecked(t.id);
+  return `<div class="task-item ${done ? 'done' : ''}" id="task-${t.id}" data-task="${t.id}">
+    <div class="task-check">${done ? '✓' : ''}</div>
+    <div class="task-body">
+      <div class="task-name">${t.name}</div>
+      <div class="task-detail">${t.detail}</div>
+    </div>
+    <div class="task-tag ${t.tagColor}">${t.tag}</div>
+  </div>`;
+}
+
+function attachTaskHandlers() {
+  document.querySelectorAll('.task-item').forEach(el => {
+    el.addEventListener('click', function() {
+      const id = this.dataset.task;
+      toggleChecked(id);
+      // Update this item inline
+      const done = getChecked(id);
+      this.className = 'task-item' + (done ? ' done' : '');
+      this.querySelector('.task-check').textContent = done ? '✓' : '';
+      // Update phase header count
+      renderPhaseHeaders();
+    });
+  });
+}
+
+function renderPhaseHeaders() {
+  PHASES.forEach(phase => {
+    const done = phase.tasks.filter(t => getChecked(t.id)).length;
+    const total = phase.tasks.length;
+    const card = document.getElementById('phase-card-' + phase.id);
+    if (card) {
+      card.querySelector('.phase-progress-label').textContent = `${done}/${total}`;
+    }
+  });
+}
+
+function togglePhase(id) {
+  const card = document.getElementById('phase-card-' + id);
+  card.classList.toggle('open');
+}
+
+function renderDomains() {
+  const grid = document.getElementById('domain-grid');
+  grid.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const status = getDomainStatus(d.id);
+    const statusPct = { 'not-started': 0, 'reading': 30, 'practicing': 65, 'mastered': 100 }[status] || 0;
+    const barColor = status === 'mastered' ? 'var(--green)' : status === 'practicing' ? 'var(--amber)' : status === 'reading' ? 'var(--accent)' : 'var(--border)';
+    const card = document.createElement('div');
+    card.className = 'domain-card' + (status === 'mastered' ? ' mastered' : '');
+    card.id = 'dcard-' + d.id;
+    card.innerHTML = `
+      <div class="domain-top">
+        <div class="domain-num-badge">Domain ${d.num} · ${d.weight}</div>
+        <span class="domain-weight ${d.color}" style="font-size:11px;padding:2px 9px;border-radius:999px;">${d.priority}</span>
+      </div>
+      <div class="domain-name">${d.name}</div>
+      <div class="domain-topics">${d.topics}</div>
+      ${d.proNote ? '<div style="font-size:12px;color:var(--accent);margin-top:6px;">⚑ Priority for experienced practitioners</div>' : ''}
+      <div class="domain-bar-track" style="margin-top:10px;">
+        <div class="domain-bar-fill" style="width:${statusPct}%;background:${barColor}"></div>
+      </div>
+      <div class="domain-status">
+        <div class="domain-status-label">${d.weeks}</div>
+        <select class="domain-status-select" data-domain="${d.id}" onchange="updateDomainStatus(this)">
+          <option value="not-started" ${status==='not-started'?'selected':''}>Not started</option>
+          <option value="reading" ${status==='reading'?'selected':''}>Reading</option>
+          <option value="practicing" ${status==='practicing'?'selected':''}>Practicing</option>
+          <option value="mastered" ${status==='mastered'?'selected':''}>Mastered</option>
+        </select>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateDomainStatus(sel) {
+  const id = sel.dataset.domain;
+  const val = sel.value;
+  setDomainStatus(id, val);
+  // Re-render just this card
+  renderDomains();
+}
+
+function renderResourceSection(data, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  data.forEach(section => {
+    const sec = document.createElement('div');
+    sec.className = 'resource-section';
+    sec.innerHTML = `<div class="resource-section-title">${section.section}</div><div class="resource-cards" id="rc-${section.section.replace(/\s+/g,'-')}"></div>`;
+    container.appendChild(sec);
+    const grid = sec.querySelector('.resource-cards');
+    section.items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'res-card' + (getChecked(item.id) ? ' checked' : '');
+      card.id = 'res-' + item.id;
+      card.dataset.resId = item.id;
+      card.innerHTML = `
+        <span class="res-badge ${item.badgeColor}">${item.badge}</span>
+        <div class="res-name">${item.name}</div>
+        <div class="res-detail">${item.detail}</div>
+        ${item.pro ? `<div class="res-pro">Pro tip: ${item.pro}</div>` : ''}
+      `;
+      card.addEventListener('click', function() {
+        toggleChecked(item.id);
+        this.classList.toggle('checked', getChecked(item.id));
+        updateDashboard();
+      });
+      grid.appendChild(card);
+    });
+  });
+}
+
+function renderTips() {
+  const list = document.getElementById('tips-list');
+  list.innerHTML = TIPS.map(t => `
+    <div class="tip">
+      <div class="tip-num">${t.num}</div>
+      <div class="tip-text">${t.text}</div>
+    </div>
+  `).join('');
+}
+
+function loadNotes() {
+  ['general','d1','d3','weak','exam'].forEach(key => {
+    const el = document.getElementById('note-' + key + '-ta');
+    if (el) el.value = getNote(key);
+  });
+}
+
+function saveNote(key) {
+  const el = document.getElementById('note-' + key + '-ta');
+  if (el) { setNote(key, el.value); }
+  const confirm = document.getElementById('save-' + key + '-confirm');
+  if (confirm) {
+    confirm.style.opacity = '1';
+    setTimeout(() => { confirm.style.opacity = '0'; }, 2000);
+  }
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────────────────
+
+function getAllTaskIds() {
+  return PHASES.flatMap(p => p.tasks.map(t => t.id));
+}
+function getAllResourceIds() {
+  return [...RESOURCES, ...MEDIA].flatMap(s => s.items.map(i => i.id));
+}
+
+function updateGlobalProgress() {
+  const allTasks = getAllTaskIds();
+  const done = allTasks.filter(id => getChecked(id)).length;
+  const total = allTasks.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const bar = document.getElementById('global-bar');
+  const label = document.getElementById('pct-label');
+  const summary = document.getElementById('global-summary');
+  if (bar) bar.style.width = pct + '%';
+  if (label) label.textContent = pct + '%';
+  if (summary) summary.textContent = `${done} of ${total} tasks complete`;
+}
+
+function updateDashboard() {
+  const allTasks = getAllTaskIds();
+  const doneTasks = allTasks.filter(id => getChecked(id)).length;
+  document.getElementById('stat-tasks').textContent = doneTasks;
+  document.getElementById('stat-tasks-sub').textContent = `of ${allTasks.length} total`;
+
+  const domainsDone = DOMAINS.filter(d => getDomainStatus(d.id) === 'mastered').length;
+  document.getElementById('stat-domains').textContent = domainsDone;
+
+  const allRes = getAllResourceIds();
+  const resChecked = allRes.filter(id => getChecked(id)).length;
+  document.getElementById('stat-books').textContent = resChecked;
+  document.getElementById('stat-books-sub').textContent = `of ${allRes.length} resources`;
+
+  // Current phase
+  let currentPhase = PHASES[0];
+  for (const p of PHASES) {
+    const done = p.tasks.filter(t => getChecked(t.id)).length;
+    if (done < p.tasks.length) { currentPhase = p; break; }
+    if (p === PHASES[PHASES.length - 1]) currentPhase = p;
+  }
+  document.getElementById('stat-phase').textContent = 'Phase ' + currentPhase.num;
+  document.getElementById('stat-phase-sub').textContent = currentPhase.name;
+
+  // Phase quickview
+  const qv = document.getElementById('phase-quickview');
+  if (qv) {
+    qv.innerHTML = PHASES.map(p => {
+      const done = p.tasks.filter(t => getChecked(t.id)).length;
+      const total = p.tasks.length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const barColor = pct === 100 ? 'var(--green)' : pct > 0 ? 'var(--accent)' : 'var(--border)';
+      return `<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
+        <div class="phase-num ${p.color}" style="width:28px;height:28px;font-size:11px;">${p.num}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px;">${p.name}</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="flex:1;background:var(--surface2);border-radius:999px;height:4px;overflow:hidden;">
+              <div style="width:${pct}%;height:4px;border-radius:999px;background:${barColor};transition:width 0.4s;"></div>
+            </div>
+            <span style="font-size:11px;font-family:var(--mono);color:var(--text-muted);white-space:nowrap;">${done}/${total}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-' + id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if (id === 'domains') renderDomains();
+}
+
+function switchNoteTab(btn, panelId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+function init() {
+  renderPhases();
+  renderDomains();
+  renderResourceSection(RESOURCES, 'resources-content');
+  renderResourceSection(MEDIA, 'media-content');
+  renderTips();
+  loadNotes();
+  updateGlobalProgress();
+  updateDashboard();
+}
+
+init();
+</script>
+</body>
+</html>
